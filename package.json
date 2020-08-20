@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --watch",
     "watch": "jest --watchAll",
     "coverage": "jest --coverage",
     "encrypt": "node ./tools/index.js"
