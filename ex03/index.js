@@ -1,18 +1,33 @@
-const fs = require('fs')
-module.exports.parser = path => {
-    const readStream = fs.createReadStream(path)
+const fs = require('fs');
+const { extname } = require('path');
+
+module.exports.parser = (path) => {
+    const readStream = fs.createReadStream(path);
     let reqData = [];
     let size = 0;
-    return new Promise(resolve => {
-         // ##BEGIN## 代码已加密
-JEHJEHJEHJEHJEHJEHJEHJEHOEXOSSOOIOSOOJSOEAOEXOSSOOIOEOJHOOEEOESJPPJPEOSOOOIOEAOOIJPEJPAJEHOSOOOIOEAOOIJEHJXIJXAJEHOPX
-JEHJEHJEHJEHJEHJEHJEHJEHJEHJEHJEHJEHOEXOSSOEHJIHOOIOEAOOIJHOOEPOPJOEIOSHJPPOSOOOIOEAOOIJPHJXH
-JEHJEHJEHJEHJEHJEHJEHJEHJEHJEHJEHJEHOEIOSXOPHOSSJEHJPIJXIJEHOSOOOIOEAOOIJHOOEJOSSOESOSPOEAOSHJXH
-JEHJEHJEHJEHJEHJEHJEHJEHOPAJPHJXH
-JEHJEHJEHJEHJEHJEHJEHJEHOEXOSSOOIOSOOJSOEAOEXOSSOOIOEOJHOOEEOESJPPJPEOSSOESOSOJPEJPAJEHOSEOPJOESOSJOEAOSXOEEOESJEHJPPJPHJEHOPX
-JEHJEHJEHJEHJEHJEHJEHJEHJEHJEHJEHJEHOSJOEEOESOEIOEAJEHOSOOOIOEAOOIJEHJXIJEHJIEOPJOSEOSEOSSOEXJHOOSJOEEOESOSJOOIOEAJPPOEXOSSOEHJIHOOIOEAOOIJPAJEHOEIOSXOPHOSSJPHJXH
-JEHJEHJEHJEHJEHJEHJEHJEHJEHJEHJEHJEHOEXOSSOEIOEEOEJOPOOSSJPPJASOJSJAIJAXJHOOEPOOIOEXOEIOSSJPPOSOOOIOEAOOIJHOOEAOEEOJSOEAOEXOSXOESOSPJPPJPHJPHJPH
-JEHJEHJEHJEHJEHJEHJEHJEHOPAJPHJXH
-         // ##END##
-    })
-}
+
+    return new Promise((resolve, reject) => {
+        const ext = extname(path);
+        const stream = fs.createReadStream(path);
+
+        stream.on('data', (chunk) => {
+            reqData.push(chunk);
+            size += chunk.length;
+        });
+
+        stream.on('end', () => {
+            let content = Buffer.concat(reqData, size).toString();
+
+            if (ext === '.json') {
+                try {
+                    content = JSON.parse(content);
+                } catch (e) {
+                    return reject(e);
+                }
+            }
+            resolve(content);
+        });
+
+        stream.on('error', reject);
+    });
+};
